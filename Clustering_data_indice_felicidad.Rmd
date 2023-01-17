@@ -1,8 +1,6 @@
 ---
-title: "Laboratorio 9. Introduccion al Clustering. Grupo1 - C28"
-author: 'Grupo1: Asto Modragon Irwin Rufo, Caceres Porta Erick Alessandro, Condori
-  Ordoñez Luis, Farfan Alvizuri Yudit, Garcia Pinaud Diego, Juan de Dios Yupanqui
-  Luis.'
+title: "Aplicacion de Clustering"
+author: 'Garcia Diego'
 date: "2022-12-20"
 output: html_document
 ---

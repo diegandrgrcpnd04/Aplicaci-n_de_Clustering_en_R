@@ -1,0 +1,417 @@
+---
+title: "Laboratorio 9. Introduccion al Clustering. Grupo1 - C28"
+author: 'Grupo1: Asto Modragon Irwin Rufo, Caceres Porta Erick Alessandro, Condori
+  Ordoñez Luis, Farfan Alvizuri Yudit, Garcia Pinaud Diego, Juan de Dios Yupanqui
+  Luis.'
+date: "2022-12-20"
+output: html_document
+---
+
+#Instalando paquetes
+
+```{r}
+
+#install.packages("stats")
+#install.packages("dplyr")
+
+install.packages("ggplot2")
+
+install.packages("ggfortify")
+
+install.packages("factoextra")
+
+```
+
+
+
+
+#Cargando librerias
+
+```{r}
+
+library("ggfortify")
+
+library("ggplot2")
+
+library("factoextra")
+
+
+```
+
+
+
+
+#Abriendo data
+
+#La data contiene un sondeo de personas de todo el mundo, a quienes se les pregunto si eran felices o no.
+
+```{r}
+
+df_felicidad <- read.csv("DataForTable2.1.csv",sep=";")
+
+# estructura
+str(df_felicidad)
+
+# estadísticas básicas
+summary(df_felicidad)
+
+# vistazo
+head(df_felicidad)
+
+tail(df_felicidad)
+
+```
+
+#Filtramos los valores del año 2021
+
+```{r}
+
+df_felicidad_2021 <- subset(df_felicidad, year == 2021)
+
+# estructura
+str(df_felicidad_2021)
+
+# estadísticas básicas
+summary(df_felicidad_2021)
+
+# vistazo
+head(df_felicidad_2021)
+
+tail(df_felicidad_2021)
+
+
+```
+
+#Revisamos los valores nulos 
+
+```{r}
+#numero de observaciones con valores nulos
+colSums(is.na(df_felicidad))
+
+
+#La data contiene valores nulos que impediran realizar nuestro analisis con el metodo kmeans.
+
+```
+
+#Quitamos los valores nulos
+
+```{r}
+
+#eliminando observaciones con valores nulos
+df_felicidad_f <- na.omit(df_felicidad_2021)
+
+```
+
+#Revisamos la estructura del nuevo dataset
+
+```{r}
+
+# estructura
+str(df_felicidad_f )
+
+# estadísticas básicas
+summary(df_felicidad_f )
+
+# vistazo
+head(df_felicidad_f )
+
+tail(df_felicidad_f )
+
+colSums(is.na(df_felicidad_f))
+
+#Ahora la data no contiene valores nulos.
+
+```
+
+#Revisamos las variables numericas y no-numericas
+
+```{r}
+names(df_felicidad_f)
+
+#Notamos que la columna "Country.name es de tipo cadena y no-numerica. Por lo tanto, la quitamos para solo quedarnos con las columnas que contengas variables numericas"
+
+```
+
+#Separamos la columna de tipo no-numerica. La columna Country.name es la primera.
+
+```{r}
+
+dat_felicidad <- df_felicidad_f[,-c(1)]
+
+nombres_paises <- df_felicidad_f$Country.name
+
+dat_felicidad
+
+# estructura
+str(dat_felicidad )
+
+# estadísticas básicas
+summary(dat_felicidad )
+
+# vistazo
+head(dat_felicidad )
+
+tail(dat_felicidad )
+
+colSums(is.na(dat_felicidad))
+
+#Ahora nuestra data se encuentra lista para que apliquemos el metodo kmeans
+
+```
+
+#Clustering kmeans
+
+
+```{r}
+
+kmeans_fel <- kmeans(dat_felicidad, centers = 3, nstart = 15)
+
+# identificando los centroides
+kmeans_fel$centers
+
+summary(kmeans_fel)
+
+kmeans_fel$tot.withinss
+
+kmeans_fel$cluster
+
+# matriz de confusión
+matriz_confusion <- table(kmeans_fel$cluster, df_felicidad_f$Country.name)
+
+#Aqui agrupamos los centros de los clusters con sus respectivos nombres
+
+sum(apply(matriz_confusion, 1, max))/sum(matriz_confusion)
+```
+
+
+### cluster jerarquico
+
+#Aqui probamos diferentes metodos de clustering
+
+
+```{r}
+
+fel_single <- hclust(dist(dat_felicidad), method = "single")
+
+
+# Apply cutree() to run_single: memb_single
+memb_single <- cutree(tree = fel_single, k = 3)
+
+# Apply plot() on run_single to draw the dendrogram
+plot(x=fel_single)
+
+# Apply rect.hclust() on run_single to draw the boxes
+rect.hclust(fel_single, k=3, border=2:6)
+
+# revisando los 5 primeros cluster
+head(memb_single)
+
+# número de miembros por cluster
+table(memb_single)
+
+# matriz de confusión
+matriz_confusion <- table(memb_single, df_felicidad_f$Country.name)
+
+sum(apply(matriz_confusion, 1, max))/sum(matriz_confusion)
+
+
+
+```
+
+
+```{r}
+
+fel_single <- hclust(dist(dat_felicidad), method = "complete")
+
+
+# Apply cutree() to run_single: memb_single
+memb_single <- cutree(tree = fel_single, k = 3)
+
+# Apply plot() on run_single to draw the dendrogram
+plot(x=fel_single)
+
+# Apply rect.hclust() on run_single to draw the boxes
+rect.hclust(fel_single, k=3, border=2:6)
+
+# revisando los 5 primeros cluster
+head(memb_single)
+
+# número de miembros por cluster
+table(memb_single)
+
+# matriz de confusión
+matriz_confusion <- table(memb_single, df_felicidad_f$Country.name)
+
+sum(apply(matriz_confusion, 1, max))/sum(matriz_confusion)
+
+
+
+```
+
+
+```{r}
+
+fel_single <- hclust(dist(dat_felicidad), method = "average")
+
+
+# Apply cutree() to run_single: memb_single
+memb_single <- cutree(tree = fel_single, k = 3)
+
+# Apply plot() on run_single to draw the dendrogram
+plot(x=fel_single)
+
+# Apply rect.hclust() on run_single to draw the boxes
+rect.hclust(fel_single, k=3, border=2:6)
+
+# revisando los 5 primeros cluster
+head(memb_single)
+
+# número de miembros por cluster
+table(memb_single)
+
+# matriz de confusión
+matriz_confusion <- table(memb_single, df_felicidad_f$Country.name)
+
+sum(apply(matriz_confusion, 1, max))/sum(matriz_confusion)
+
+
+
+```
+
+
+
+
+
+
+```{r}
+
+fel_single <- hclust(dist(dat_felicidad), method = "ward.D")
+
+
+# Apply cutree() to run_single: memb_single
+memb_single <- cutree(tree = fel_single, k = 3)
+
+# Apply plot() on run_single to draw the dendrogram
+plot(x=fel_single)
+
+# Apply rect.hclust() on run_single to draw the boxes
+rect.hclust(fel_single, k=3, border=2:6)
+
+# revisando los 5 primeros cluster
+head(memb_single)
+
+# número de miembros por cluster
+table(memb_single)
+
+# matriz de confusión
+matriz_confusion <- table(memb_single, df_felicidad_f$Country.name)
+
+sum(apply(matriz_confusion, 1, max))/sum(matriz_confusion)
+
+
+
+```
+
+
+
+
+### encontrando el mejor k con tot.withins
+
+#Aqui nos quedamos con el metodo tot.withins y aplicamos el metodo del codo.
+
+```{r}
+
+m_indicador <- matrix( 1:8*0 , nrow=4)
+
+for (k in 2:5) {
+
+  # hacemos un clustering con k = 3
+  kmeans_felicidad <- kmeans(dat_felicidad, centers = k, nstart = 15)
+  
+  m_indicador[k-1, 1] = k
+  m_indicador[k-1, 2] = kmeans_felicidad$tot.withinss
+}
+
+  
+m_indicador
+
+#Graficamos la grafica del codo, y vemos que un k=3 se empieza a ver la diferencia.
+
+plot(m_indicador, type = "l")
+
+
+```
+
+
+#Podemos ver que con k=3 se logra un buen ajuste.
+#Tomaremos este valor para graficar los clusteres y ver como estan agrupados
+
+```{r}
+
+kmeans_felicidad=kmeans(dat_felicidad,centers=3,nstart=15)
+
+autoplot(kmeans_felicidad,dat_felicidad,frame=TRUE)
+
+
+fviz_cluster(object=kmeans_felicidad, data=dat_felicidad)
+
+
+```
+
+#Quitaremos la primera columna del dataframe felicidad, ya que se trata de la variable year=2021, al tratarse de una columna con un valor fijo, entorpecera la realizacion de los graficos de los clusteres.
+
+```{r}
+
+dat_felicity=dat_felicidad[,-c(1)]
+
+
+```
+
+
+
+#Las graficas anteriores nos daban una vista poco precisa de los paises y su ubicacion en los clusteres. Solo se visualizaba el orden de las filas del dataframe, mas no los nombres. Trataremos de ir por ese lado.
+#Crearemos un nuevo dataframe, en cuyas filas iran los nombres de los paises.
+
+```{r}
+
+rownames(dat_felicity)=c(nombres_paises)
+
+fviz_cluster(object=kmeans_felicidad, data=dat_felicity)
+
+fviz_cluster(kmeans_felicidad, data=dat_felicity,ellipse.type="euclid",repel=TRUE,star.plot=TRUE)
+
+fviz_cluster(kmeans_felicidad, data=dat_felicity,,ellipse.type="norm")
+
+```
+
+#Ahora si podemos visualizar con mejor detenimiento la ubicacion de los paises en los clusteres, y sacar mejores conclusiones acerca de sus indices de felicidad.
+
+
+
+#Conclusiones
+
+#En este laboratorio vimos el metodo kmeans y como realizar la grafica del codo. Vimos los diferentes metodos del kmeans.
+
+#Tambien vimos como proceder a trabajar con una data que contiene datos nulos o vacios. El programa R nos permite hacer una adecuado tratamiento de la data para que este lista para ser usada y modificada por diferentes metodos.
+
+#Vimos con k=3, es decir, que agrupando los datos en 3 clusterings se hace un analisis mas efectivo de los datos, con valor de k mas elevado este analisis se hacer mas irrelevante.
+
+#Las graficas nos ayudan a visibilizar de esto de una manera mucho mas interactiva y amigable.
+
+#El cluster numero 1, que en la grafica se situa en el medio, corresponderia a los paises que tienen indicadores intermedios, en terminos de accesibilidad, confianza en sus respectivos gobiernos, indicadores de educacion e ingreso percapita. Son paises por lo general, ubicados en America Latina, Asia Central y Oriente Medio. Aqui tambien vemos a los Estados Unidos de America, que por mas que sea un pais de elevados ingresos y oportunidades, los conflictos sociales y etnicos, la desconfianza en el gobierno, la caida del nivel de vida por el alto coste en la salud repercuten en que sus ciudadanos no se sientan del todo satisfechos y a disminuir su indice de felicidad.
+
+#El cluster numero 2, que en la grafica se situa en la parte derecha, se ubican los paises que tienen indicadores elevados, y que por lo general se encuentran ubicados paises europeos u otros como Canada y Nueva Zelanda. Su ubicacion no deberia sorprendernos, puesto que estos paises han desarrollado una elevada confianza en sus gobiernos, adecuados manejos de su economia, poseen redes de ayuda socioeconomica y bajo indice de corrupcion. Quizas el pais que nos sorprende que este en este cluster es Turquia, pero a comparacion de sus vecinos, Turquia se encuentra bastante desarrollado, tiene un gobierno fuerte que crea confianza en los ciudadadanos, y la generosidad presente desde tiempos milenarios en la cultura turca ayuda a crear un clima de confianza y felicidad en sus ciudadanos.
+
+#El cluster numero 3, que se situa en la parte izquierda, corresponde a los paises que tienen inidcadores bajos. Son paises por lo general de Africa, y tambien se incluye a la India. Las guerras, los conflictos a gran escala, la sobrepoblacion y el alto indice de corrupcion llevan a un bajo indice de vida, y por lo tanto, un indice de vida con mucho mas sufrimiento y limitaciones.
+
+#Para concluir, consideramos que la eleccion de k=3 es buena, porque nos permite dividir los datos en tres clusteres, y esa division es la mejor manera de analizar esta fuente de datos, ya que creando menos o mas divisiones al final haria que el analisis de los datos sea irrelevante.
+
+
+
+
+
+
+
+
+
+
